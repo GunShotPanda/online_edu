@@ -8,21 +8,35 @@
 {% endblock %}
 {% block container %}
 <div class="v5-banner-big">
-    <div class="container">
-      <div class="carousel-container">
-        <div id="carousel">
-          <div class="carousel-feature">
-            <a href="#"><img class="carousel-image" alt="Image Caption" src="{% static 'test/1.jpg' %}"></a>
-          </div>
-          <div class="carousel-feature">
-            <a href="#"><img class="carousel-image" alt="Image Caption" src="{% static 'test/1.jpg' %}"></a>
-          </div>
-          <div class="carousel-feature">
-            <a href="#"><img class="carousel-image" alt="Image Caption" src="{% static 'test/1.jpg' %}"></a>
-          </div>
+    <br>
+    <br>
+    <br>
+        <div id="myCarousel" class="carousel slide">
+            <!-- 轮播（Carousel）指标 -->
+            <ol class="carousel-indicators">
+                <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                <li data-target="#myCarousel" data-slide-to="1"></li>
+                <li data-target="#myCarousel" data-slide-to="2"></li>
+            </ol>
+            <!-- 轮播（Carousel）项目 -->
+            <div class="carousel-inner" align="center">
+                {% for ad in ads %}
+                    {% if forloop.first %}
+                        <div class="item active">
+                    {% else %}
+                        <div class="item">
+                    {% endif %}
+                        <a href="{{ ad.callback_url }}"><img class="carousel-image" alt="{{ ad.title }}" src="{% url 'uploads' ad.img %} " style="height: 545px;"></a>
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- 轮播（Carousel）导航 -->
+            <a class="carousel-control left" href="#myCarousel"
+               data-slide="prev">&lsaquo;</a>
+            <a class="carousel-control right" href="#myCarousel"
+               data-slide="next">&rsaquo;</a>
         </div>
-      </div>
-    </div>
+
   </div>
 <div class="v5-index-main">
     <div class="v5-titline"></div>
@@ -500,13 +514,11 @@
         </div>
         <div class="v5-read-item">
           <div class="v5-read-list" style="background-color:#00A388;">
-            <h1>麦子百科</h1>
+            <h1>最新活动</h1>
             <ul>
-              <li><a href="" title="发现创新价值的科技媒体">发现创新价值的科技媒体</a></li>
-              <li><a href="" title="iOS 和 Android 之争可以终结了">iOS 和 Android 之争可以终结了</a></li>
-              <li><a href="" title="加码云计算市场，惠普近 1 亿收购云软件公司">加码云计算市场，惠普近 1 亿收购云软件公司</a></li>
-              <li><a href="" title="HTC 智能手表：传并未放弃，正努力改进">HTC 智能手表：传并未放弃，正努力改进</a></li>
-              <li><a href="" title="第一次！首批 Android app 上架 Chrome ">第一次！首批 Android app 上架 Chrome</a></li>
+                {% for article in articles %}
+                    <li><a href="{% url 'common:article' id=article.id %}" title="{{ article.title }}">{{ article.title }}</a></li>
+                {% endfor %}
             </ul>
           </div>
           <p><img src="{% static 'test/5.jpg' %}"></p>
