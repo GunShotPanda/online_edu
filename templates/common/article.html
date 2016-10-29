@@ -1,0 +1,27 @@
+{% extends 'common/base.html'%}
+{% load staticfiles %}
+{% block container %}
+    <div class="container">
+        <div class="title">
+            <h2><a href="" rel="bookmark" title="{{ article.title }}">{{ article.title }}</a></h2>
+
+        </div>
+        <span class="tags">
+            {{ article.data_publish | date:'Y-m-d H:i:s'}}
+                <span>   标签：</span>
+                {% for keyword in article.article_keywords.all %}
+                <a href="?tag={{ keyword.name }}" rel="tag">{{ keyword.name }}</a>
+                {% endfor %}
+        </span>
+
+        <div class="entry">
+            <br>
+            {{ article.content}}
+        </div>
+        <br/>
+
+
+    </div>
+
+
+{% endblock %}
