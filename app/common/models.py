@@ -137,7 +137,7 @@ class Course(models.Model):
     favorite_count = models.IntegerField(u"收藏数量",default=0)
     click_count = models.IntegerField(u"点击数量",default=0)
     is_voince = models.BooleanField(u"是否新手课程",default=False)
-    teacher = models.ForeignKey(settings.AUTH_USER_MODEL,verbose_name=u"授课老师")
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL,verbose_name=u"授课的老师")
     stages = models.ForeignKey(Stage,verbose_name=u"课程阶段",blank=True,null=True)
     search_keywords = models.ManyToManyField(KeyWord,verbose_name=u"小课程搜索关键字")
     is_homeshow = models.BooleanField(u"是否显示首页",default=False)
