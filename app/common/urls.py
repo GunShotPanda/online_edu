@@ -23,4 +23,5 @@ app_name = 'common'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^article/(?P<id>\d+)/$', views.article, name='article'),
+    url(r'^keyword/$', views.search_keyword, name='keyword'),
 ]

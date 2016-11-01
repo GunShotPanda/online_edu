@@ -51,14 +51,9 @@
             <div class="hotkeyword">
               <h4>推荐搜索关键词</h4>
               <ul class="cf">
-                <li><a href="">Android</a></li>
-                <li><a href="">Android</a></li>
-                <li><a href="">WP</a></li>
-                <li><a href="">Android</a></li>
-                <li><a href="">WP</a></li>
-                <li><a href="">Android</a></li>
-                <li><a href="">WP</a></li>
-                <li><a href="">Android</a></li>
+                  {% for keyword in recommend_keywords %}
+                    <li><a href="">{{ keyword.name }}</a></li>
+                  {% endfor %}
               </ul>
             </div>
           </div>
@@ -271,6 +266,7 @@ $(function() {
 		smallFeatureOffset:	100,
 		trackerSummation: false
 	});
+
 	//首页名师切换
 	$('#foo').carouFredSel({
 		auto: false,
@@ -286,6 +282,50 @@ $(function() {
 			duration:1000
 		}
 	});
+
+    {# 处理post请求的csrf #}
+        $.ajaxSetup({
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+            });
+
+    {# 获取服务端发送的一些联想词之后，页面用列表将他们显示 #}
+    function getKeyWord(data) {
+            var keywords = JSON.parse(data);
+
+            // 先清空之前的列表
+{#            $(".keyword_list").empty();#}
+{##}
+{#            // 如果联想词的列表为空，则清空此列表#}
+{#            // 如果联想词的列表不为空，则循环显示此列表#}
+{#            if(jQuery.isEmptyObject(keywords)){#}
+{#                $(".keyword_list").empty();#}
+{#            }#}
+{#            else{#}
+{#                //循环显示这些联想词#}
+{#                for(var i=0; i<keywords.word_list.length;i++){#}
+{#                    $(".keyword_list").append("<li class='list-group-item word'>" +keywords.word_list[i] + "</li>" );#}
+{#                }#}
+{#            }#}
+
+            console.log(keywords)
+    }
+
+    //搜索关键字
+    $('#search').keyup(function () {
+        var word = $('#search').val();
+        console.log(word);
+        $.ajax({
+                    url:'{% url "common:keyword" %}',
+                    data:{"word":word},
+                    type:'POST',
+                    dataType:'text',
+                    success:getKeyWord,
+                    error:function (data,errorThrown) {
+                        alert(errorThrown);
+                    }
+                });
+    });
+
   
 	//登录后 
   function show_card(){

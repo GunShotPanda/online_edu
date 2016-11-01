@@ -12,6 +12,33 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager,AbstractBaseUser,PermissionsMixin
 from datetime import datetime
 from django.core.mail import send_mail
+from django.conf import settings
+
+class KeyWord(models.Model):
+    '''
+    关键字
+    '''
+    name = models.CharField(u"关键字",max_length=10,unique=True)
+
+    class Meta:
+        verbose_name = u"关键字"
+        verbose_name_plural = verbose_name
+        db_table = 'keywords'
+
+    def __unicode__(self):
+        return self.name
+
+class RecommendKeyword(models.Model):
+
+    name = models.CharField(u"推荐关键字",max_length=10,unique=True)
+
+    class Meta:
+        verbose_name = u"推荐关键字"
+        verbose_name_plural = verbose_name
+        db_table = 'recommend_keyword'
+
+    def __unicode__(self):
+        return self.name
 
 class Ad(models.Model):
     '''
@@ -33,6 +60,162 @@ class Ad(models.Model):
     def __unicode__(self):
         return self.title
 
+#友情链接
+class Links(models.Model):
+
+    title = models.CharField(u"标题",max_length=50)
+    discription = models.CharField(u"描述",max_length=200,null=True,blank=True)
+    callback_url = models.URLField(u"链接")
+    image = models.ImageField(u"图片路径",upload_to='link/%Y/%m',null=True,blank=True)
+
+    class Meta:
+        verbose_name = "友情链接"
+        verbose_name_plural = verbose_name
+        db_table = "links"
+
+    def __unicode__(self):
+        return self.title
+
+
+#职业课程
+class CareerCourse(models.Model):
+
+    name = models.CharField(u"课程名称", max_length=50)
+    short_name = models.CharField(u"英文简写", max_length=10,unique=True)
+    image = models.ImageField(u"图片",upload_to='course/%Y/%m')
+    discription = models.TextField(u"描述")
+    student_count = models.IntegerField(u"学生数量",default=0)
+    market_page_url = models.URLField(u"营销页面地址",null=True,blank=True)
+    total_price = models.DecimalField(u"课程价格",max_digits=7,decimal_places=1,default=0)
+    discount = models.DecimalField(u'折扣',default=1,max_digits=3,decimal_places=2)
+    click_count = models.IntegerField(u"点击数量",default=0)
+    index = models.IntegerField(u"排序",default=999)
+    search_keywords = models.ManyToManyField(KeyWord,verbose_name=u"搜索关键字")
+
+    class Meta:
+        verbose_name = '职业课程'
+        verbose_name_plural = verbose_name
+        ordering = ['-id']
+        db_table = 'career_course'
+
+    def __unicode__(self):
+        return self.name
+
+#课程阶段
+class Stage(models.Model):
+
+    name = models.CharField(u"阶段名称", max_length=50)
+    discription = models.TextField(u"描述",null=True,blank=True)
+    index = models.IntegerField(u"顺序",default=999)
+    is_try = models.BooleanField(u"是否试学",default=False)
+    career_course = models.ForeignKey(CareerCourse,verbose_name=u"职业课程")
+
+    class Meta:
+        verbose_name = u'阶段'
+        verbose_name_plural = verbose_name
+        ordering = ['index', 'id']
+        db_table = 'stage'
+
+    def __unicode__(self):
+        return self.name
+
+
+
+#课程
+class Course(models.Model):
+
+    name = models.CharField(u"课程名称", max_length=50)
+    image = models.ImageField(u"课程图片",upload_to="course/%Y/%m")
+    discription = models.TextField(u"描述", null=True, blank=True)
+    index = models.IntegerField(u"顺序", default=999)
+    is_active = models.BooleanField(u"是否激活",default=True)
+    date_publish = models.DateTimeField(u"发布时间",auto_now_add=True)
+    date_update = models.DateTimeField(u"更新时间",auto_now=True)
+    need_days = models.IntegerField(u"学习时间/h",default=5)
+    need_days_base = models.IntegerField(u"有基础的学习时间/h",default=3)
+    student_count = models.IntegerField(u"学生人数",default=0)
+    favorite_count = models.IntegerField(u"收藏数量",default=0)
+    click_count = models.IntegerField(u"点击数量",default=0)
+    is_voince = models.BooleanField(u"是否新手课程",default=False)
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL,verbose_name=u"授课老师")
+    stages = models.ForeignKey(Stage,verbose_name=u"课程阶段",blank=True,null=True)
+    search_keywords = models.ManyToManyField(KeyWord,verbose_name=u"小课程搜索关键字")
+    is_homeshow = models.BooleanField(u"是否显示首页",default=False)
+    is_required = models.BooleanField(u"是否必修",default=True)
+
+    class Meta:
+        verbose_name = u'课程'
+        verbose_name_plural = verbose_name
+        ordering = ['index', 'id']
+        db_table = 'course'
+
+    def __unicode__(self):
+        return self.name
+
+class StageCourse(models.Model):
+
+        stages = models.ForeignKey(Stage)
+        courses = models.ForeignKey(Course)
+
+        class Meta:
+            verbose_name = u'阶段-课程'
+            verbose_name_plural = verbose_name
+            ordering = ['id']
+            db_table = 'stage_courses'
+
+
+#视频章节
+class Lesson(models.Model):
+
+    name = models.CharField(u"名称", max_length=50)
+    video_url = models.CharField(u"视频地址",max_length=200)
+    video_length = models.IntegerField(u"视频长度")
+    play_count = models.IntegerField(u"播放次数",default=0)
+    share_count = models.IntegerField(u"分享次数",default=0)
+    index = models.IntegerField(u"播放顺序",default=999)
+    is_popup = models.BooleanField(u"是否弹出支付窗口",default=False)
+    course = models.ForeignKey(Course,verbose_name=u'课程')
+
+    class Meta:
+        verbose_name = u'章节'
+        verbose_name_plural = verbose_name
+        ordering = ['index', 'id']
+        db_table = 'lesson'
+
+    def __unicode__(self):
+        return self.name
+
+#课程资源
+class CourseResource(models.Model):
+
+    name = models.CharField(u"名称", max_length=50)
+    download_url = models.FileField(u"下载地址", upload_to="course/%Y/%m")
+    course = models.ForeignKey(Course,verbose_name=u"课程")
+
+    class Meta:
+        verbose_name = u'课程资源'
+        verbose_name_plural = verbose_name
+        db_table = 'course_resourse'
+
+    def __unicode__(self):
+        return self.name
+
+#章节资源
+class LessonResource(models.Model):
+
+    name = models.CharField(u"名称", max_length=50)
+    download_url = models.FileField(u"下载地址", upload_to="lesson/%Y/%m")
+    lesson = models.ForeignKey(Lesson,verbose_name=u"章节")
+
+    class Meta:
+        verbose_name = u'章节资源'
+        verbose_name_plural = verbose_name
+        db_table = 'lesson_resourse'
+
+    def __unicode__(self):
+        return self.name
+
+#用户管理器
 class UserProfileManager(BaseUserManager):
 
     '''
@@ -71,8 +254,8 @@ class UserProfile(AbstractBaseUser,PermissionsMixin):
     '''
 
     username = models.CharField(u"昵称", max_length=30, unique=True)
-    first_name = models.CharField(u"名字",max_length=30,blank=True)
-    last_name = models.CharField(u'姓',max_length=30,blank=True)
+    first_name = models.CharField(u"姓",max_length=30,blank=True)
+    last_name = models.CharField(u'名字',max_length=30,blank=True)
     email = models.EmailField(u'邮箱', max_length=100,blank=True, unique=True)
     is_staff = models.BooleanField(u"是否职员", default=False,help_text=u"是否能够登录管理后台")
     is_active = models.BooleanField(u"是否激活",default=True)
@@ -107,7 +290,7 @@ class UserProfile(AbstractBaseUser,PermissionsMixin):
         '''
         Returns the first_name plus the last_name, with a space in between.
         '''
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = '%s%s' % (self.first_name, self.last_name)
         return full_name.strip()
 
     def get_short_name(self):
@@ -136,19 +319,7 @@ class UserProfile(AbstractBaseUser,PermissionsMixin):
         return self.username
 
 
-class KeyWord(models.Model):
-    '''
-    关键字
-    '''
-    name = models.CharField(u"关键字",max_length=10,unique=True)
 
-    class Meta:
-        verbose_name = u"关键字"
-        verbose_name_plural = verbose_name
-        db_table = 'keywords'
-
-    def __unicode__(self):
-        return self.name
 
 class Article(models.Model):
     '''
